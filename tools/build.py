@@ -175,12 +175,12 @@ def head(pg, extra_ld=None):
 <a class="skip" href="#main">Перейти до вмісту</a>
 <header class="site-head">
   <div class="wrap site-head__in">
-    <a class="logo" href="{pg.u("")}" aria-label="Футбол України — на головну"><span class="logo__mark" aria-hidden="true"></span>Футбол України</a>
+    <a class="logo" href="{pg.u("")}" aria-label="Футбол України — на головну"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#ffd23f"/><circle cx="20" cy="20" r="12.5" fill="#13213c"/><path d="M20 13.4l6.2 4.5-2.4 7.3h-7.6l-2.4-7.3z" fill="#ffd23f"/><path d="M20 7.6v5.8M26.2 17.9l5.8-1.9M23.8 25.2l3.5 4.8M16.2 25.2l-3.5 4.8M13.8 17.9L8 16" stroke="#ffd23f" stroke-width="1.7" fill="none"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Меню</button>
     <nav id="site-nav" class="site-nav" aria-label="Розділи"><ul>{nav}</ul></nav>
   </div>
 </header>
-<nav class="crumbs wrap" aria-label="Хлібні крихти"><ol>{crumbs}</ol></nav>
+<div class="crumbs-bar"><nav class="crumbs wrap" aria-label="Хлібні крихти"><ol>{crumbs}</ol></nav></div>
 '''
 
 def foot(pg):
@@ -188,7 +188,7 @@ def foot(pg):
     js=pg.u("").replace("index.html","")+"assets/js/main.js"
     return f'''<footer class="site-foot">
   <div class="wrap site-foot__in">
-    <a class="logo logo--foot" href="{pg.u("")}"><span class="logo__mark" aria-hidden="true"></span>Футбол України</a>
+    <a class="logo logo--foot" href="{pg.u("")}"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#ffd23f"/><circle cx="20" cy="20" r="12.5" fill="#13213c"/><path d="M20 13.4l6.2 4.5-2.4 7.3h-7.6l-2.4-7.3z" fill="#ffd23f"/><path d="M20 7.6v5.8M26.2 17.9l5.8-1.9M23.8 25.2l3.5 4.8M16.2 25.2l-3.5 4.8M13.8 17.9L8 16" stroke="#ffd23f" stroke-width="1.7" fill="none"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
     <ul class="site-foot__nav">{links}</ul>
     <p class="site-foot__copy">© 2026 «Футбол України». Дані турнірних таблиць і календарів оновлюються автоматично.</p>
   </div>
@@ -198,10 +198,12 @@ def foot(pg):
 </html>
 '''
 
-def league_band(pg, key, lg, active, h1, lead=None, tabs=None):
+def league_band(pg, key, lg, active, h1, lead=None, tabs=None, stats=None):
     tabs = tabs or [("", "Огляд"),("news","Новини"),("table","Таблиця"),("calendar","Календар"),("bombardyry","Бомбардири")]
     t="".join(f'<li><a href="{pg.u(key+("/"+p if p else ""))}"{" aria-current=\"page\"" if p==active else ""}>{E(n)}</a></li>' for p,n in tabs)
     lead_html=f'<p class="band__lead">{E(lead)}</p>' if lead else ""
+    if stats:
+        lead_html+='<dl class="band__stats">'+"".join(f'<div><dt>{E(a)}</dt><dd>{b}</dd></div>' for a,b in stats)+'</dl>'
     return f'''<div class="band">
   <div class="wrap">
     <div class="band__title">
@@ -214,6 +216,19 @@ def league_band(pg, key, lg, active, h1, lead=None, tabs=None):
 </div>
 '''
 
+PAL=[("#1c4fd6","#fff"),("#cf3b2f","#fff"),("#1f8a5b","#fff"),("#ffd23f","#13213c"),("#e0a106","#13213c"),("#6b3fa0","#fff"),("#0e7c86","#fff"),("#f26a21","#fff"),("#4a5a73","#fff"),("#13213c","#ffd23f")]
+import re as _re, zlib as _z
+def crest(name, big=False):
+    w=[x for x in _re.split(r"[\s\-]+",name) if x]
+    if len(w)>1: ini=(w[0][0]+w[1][0])
+    elif name.isupper() and len(name)<=3: ini=name
+    else: ini=name[0]
+    bg,fg=PAL[_z.crc32(name.encode())%len(PAL)]
+    return f'<span class="crest{" crest--big" if big else ""}" style="--c-bg:{bg};--c-fg:{fg}" aria-hidden="true" data-source="api:team.logo">{E(ini.upper())}</span>'
+def pts_word(n):
+    m=n%10; h=n%100
+    w='очко' if m==1 and h!=11 else ('очки' if 2<=m<=4 and not 12<=h<=14 else 'очок')
+    return f'{n} {w}'
 def gd(f,a): d=f-a; return f"+{d}" if d>0 else str(d)
 def zone(lg,pos):
     for a,b,c,_ in lg["zones"]:
@@ -227,7 +242,7 @@ def table_html(lg, rows, compact=False, caption=None):
     body=""
     for i,(t,g,w,d,l,f,a,p) in enumerate(rows,1):
         z=zone(lg,i)
-        body+=f'<tr class="{("z-"+z) if z else ""}"><td class="c-pos">{i}</td><th scope="row" class="c-team">{E(t)}</th><td>{g}</td>'
+        body+=f'<tr class="{("z-"+z) if z else ""}"><td class="c-pos">{i}</td><th scope="row" class="c-team"><span class="team">{crest(t)}{E(t)}</span></th><td>{g}</td>'
         if not compact: body+=f'<td class="c-wdl">{w}</td><td class="c-wdl">{d}</td><td class="c-wdl">{l}</td><td class="c-goals">{f}–{a}</td>'
         body+=f'<td>{gd(f,a)}</td><td class="c-pts">{p}</td></tr>'
     cap=f'<caption>{E(caption)}</caption>' if caption else ""
@@ -245,18 +260,20 @@ def match_rows(ms, show_round_date=True):
         dd = "" if d=="перенесено" else d
         out+=f'''<li class="m{" m--played" if played else ""}">
   <time class="m__date">{E(dd)}{('<span class="m__flag">перенесено</span>') if status else ""}</time>
-  <span class="m__home">{E(h)}</span>{mid}<span class="m__away">{E(a)}</span>
+  <span class="m__home"><span class="m__name">{E(h)}</span>{crest(h)}</span>{mid}<span class="m__away">{crest(a)}<span class="m__name">{E(a)}</span></span>
 </li>'''
     return f'<ul class="matches">{out}</ul>'
 
-def news_list(pg, rub, items, n=None, big=False):
+def news_list(pg, rub, items, n=None, big=False, thumbs=False):
     items = items[:n] if n else items
     li=""
     for i,(t,slug,dt) in enumerate(items):
         href=pg.u(f"{rub}/news/{slug}")
         date,tm=dt.split(" ")
         iso="-".join(reversed(date.split(".")))+"T"+tm
-        li+=f'<li class="news__item{" news__item--lead" if big and i==0 else ""}"><a href="{href}">{E(t)}</a><time datetime="{iso}">{date}, {tm}</time></li>'
+        lead = big and i==0
+        img = f'<a class="news__img" href="{href}" tabindex="-1" aria-hidden="true" data-source="wp:thumbnail"></a>' if (lead or thumbs) else ""
+        li+=f'<li class="news__item{" news__item--lead" if lead else ""}{" news__item--thumb" if thumbs and not lead else ""}">{img}<div class="news__txt"><a href="{href}">{E(t)}</a><time datetime="{iso}">{date}, {tm}</time></div></li>'
     return f'<ul class="news">{li}</ul>'
 
 def pagination(pg, base, pages, cur=1):
@@ -317,7 +334,13 @@ def league_pages(key):
         results=match_rows(lr[2]); mini=table_html(lg, lg["table"][:6], compact=True)
     faq_h, faq_ld = faq_block(lg["faq"])
     sc = demo_scorers(lg)[:5]
-    body=head(pg,[faq_ld])+league_band(pg,key,lg,"",pg.h1, lg["intro"])+f'''
+    rows_all = lg.get("table") or groups[0][1]
+    played = max(r[1] for r in rows_all); tot = lg["rounds_total"]
+    bar=f'<span class="season-bar" role="img" aria-label="Зіграно {played} з {tot} турів"><span style="width:{played*100//tot}%"></span></span>'
+    if groups: ld_txt=" і ".join(f'{crest(r[1][0][0])} {E(r[1][0][0])}' for r in groups) ; ld_lbl="Лідери груп"
+    else: ld_txt=f'{crest(rows_all[0][0])} {E(rows_all[0][0])}, {pts_word(rows_all[0][7])}'; ld_lbl="Лідер"
+    stats=[(ld_lbl, ld_txt),("Сезон", f'{played} з {tot} турів {bar}')]
+    body=head(pg,[faq_ld])+league_band(pg,key,lg,"",pg.h1, lg["intro"], stats=stats)+f'''
 <main id="main" class="wrap">
   <section class="board" aria-labelledby="board-h">
     <div class="board__head"><h2 id="board-h">{E(board_title)}</h2><a href="{pg.u(key+"/calendar")}">Календар {E(G)}</a></div>
@@ -341,7 +364,7 @@ def league_pages(key):
       </section>
       <section class="panel" aria-labelledby="sc-h">
         <div class="panel__head"><h2 id="sc-h">Бомбардири</h2><a href="{pg.u(key+"/bombardyry")}">Усі бомбардири</a></div>
-        <ol class="toplist" data-source="api:topscorers">{"".join(f'<li><span class="toplist__name">{E(n)}<small>{E(c)}</small></span><span class="toplist__val">{g}</span></li>' for n,c,m,g,p in sc)}</ol>
+        <ol class="toplist" data-source="api:topscorers">{"".join(f'<li><span class="toplist__name">{E(n)}<small>{crest(c)}{E(c)}</small></span><span class="toplist__val">{g}</span></li>' for n,c,m,g,p in sc)}</ol>
         <p class="devnote">Приклад заповнення, дані з API.</p>
       </section>
     </aside>
@@ -358,7 +381,7 @@ def league_pages(key):
             f"Новини {G}", base+[("Новини",key+"/news")], key)
     body=head(pg)+league_band(pg,key,lg,"news",pg.h1)+f'''
 <main id="main" class="wrap narrow">
-  {news_list(pg,key,lg["news"])}
+  {news_list(pg,key,lg["news"],big=True,thumbs=True)}
   {pagination(pg,key+"/news",lg["pages"])}
 </main>
 '''+foot(pg); write(pg,body)
@@ -430,7 +453,7 @@ def zb_rows(ms):
     out=""
     for d,t,h,a,s,c in ms:
         mid=f'<span class="m__score">{s}</span>' if s else f'<span class="m__time">{t}</span>'
-        out+=f'<li class="m{" m--played" if s else ""}"><time class="m__date">{d[:5]}<small>{E(c)}</small></time><span class="m__home">{E(h)}</span>{mid}<span class="m__away">{E(a)}</span></li>'
+        out+=f'<li class="m{" m--played" if s else ""}"><time class="m__date">{d[:5]}<small>{E(c)}</small></time><span class="m__home"><span class="m__name">{E(h)}</span>{crest(h)}</span>{mid}<span class="m__away">{crest(a)}<span class="m__name">{E(a)}</span></span></li>'
     return f'<ul class="matches matches--wide">{out}</ul>'
 zlg=dict(season="2026/27")
 ztabs=[("","Огляд"),("news","Новини"),("calendar","Календар")]
@@ -448,9 +471,9 @@ body=head(pg,[fl])+league_band(pg,"zbirna-ukrayiny",zlg,"",pg.h1,"Головни
   <section class="board board--single" aria-labelledby="board-h">
     <div class="board__head"><h2 id="board-h">Наступний матч</h2><a href="{pg.u("zbirna-ukrayiny/calendar")}">Календар збірної</a></div>
     <div class="nextmatch">
-      <span class="nextmatch__team">{E(n[2])}</span>
+      <span class="nextmatch__team">{crest(n[2],True)}{E(n[2])}</span>
       <span class="nextmatch__mid"><span class="nextmatch__time">{n[1]}</span><time>{n[0]}</time><small>{E(n[5])}</small></span>
-      <span class="nextmatch__team">{E(n[3])}</span>
+      <span class="nextmatch__team">{crest(n[3],True)}{E(n[3])}</span>
     </div>
   </section>
   <div class="grid">
@@ -467,7 +490,7 @@ body=head(pg,[fl])+league_band(pg,"zbirna-ukrayiny",zlg,"",pg.h1,"Головни
 
 pg=Page("zbirna-ukrayiny/news","Новини збірної України з футболу — Футбол України","Новини збірної України: склад, матчі Ліги націй, травми та коментарі тренерського штабу.",
         "Новини збірної України",zbase+[("Новини","zbirna-ukrayiny/news")],"zbirna-ukrayiny")
-body=head(pg)+league_band(pg,"zbirna-ukrayiny",zlg,"news",pg.h1,None,ztabs)+f'<main id="main" class="wrap narrow">{news_list(pg,"zbirna-ukrayiny",ZB["news"])}{pagination(pg,"zbirna-ukrayiny/news",ZB["pages"])}</main>'+foot(pg); write(pg,body)
+body=head(pg)+league_band(pg,"zbirna-ukrayiny",zlg,"news",pg.h1,None,ztabs)+f'<main id="main" class="wrap narrow">{news_list(pg,"zbirna-ukrayiny",ZB["news"],big=True,thumbs=True)}{pagination(pg,"zbirna-ukrayiny/news",ZB["pages"])}</main>'+foot(pg); write(pg,body)
 
 pg=Page("zbirna-ukrayiny/calendar","Календар збірної України 2026/27: розклад матчів і результати — Футбол України",
         "Розклад матчів збірної України з футболу: Ліга націй 2026/27, товариські ігри, дати, час початку та результати.",
@@ -487,7 +510,7 @@ pg=Page("transfery-ukrayiny","Трансфери України: новини, �
 body=head(pg)+f'''<div class="band"><div class="wrap"><div class="band__title"><h1>Трансфери України</h1></div>
 <p class="band__lead">Переходи, оренди та чутки про гравців українських клубів і легіонерів збірної.</p></div></div>
 <main id="main" class="wrap narrow">
-  {news_list(pg,"transfery-ukrayiny",TRANSFERS,big=True)}
+  {news_list(pg,"transfery-ukrayiny",TRANSFERS,big=True,thumbs=True)}
   {pagination(pg,"transfery-ukrayiny",296)}
   <p class="devnote">Окрему сторінку /transfery-ukrayiny/news/ не створюємо: вона веде 301 сюди, доки не з'явиться трансферна таблиця. Статті живуть за адресою /transfery-ukrayiny/news/{"{slug}"}/.</p>
 </main>
@@ -507,9 +530,9 @@ body=head(pg,[art_ld])+f'''
       <h1>{E(t)}</h1>
       <p class="article__meta"><time datetime="2026-10-18T19:01">18 жовтня 2026, 19:01</time> <span>Автор: <a href="#">Ім'я автора</a></span></p>
       <div class="matchcard" data-source="api:fixture">
-        <span class="matchcard__team">Полісся</span>
+        <span class="matchcard__team">{crest("Полісся",True)}Полісся</span>
         <span class="matchcard__score">3:1</span>
-        <span class="matchcard__team">Динамо</span>
+        <span class="matchcard__team">Динамо{crest("Динамо",True)}</span>
         <span class="matchcard__meta">УПЛ, 9-й тур, 18 жовтня 2026</span>
       </div>
       <div class="article__body">

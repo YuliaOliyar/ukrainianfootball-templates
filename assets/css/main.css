@@ -218,3 +218,88 @@ main.narrow>.news{background:var(--card);border:1px solid var(--line);border-rad
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 html{scroll-behavior:smooth}
 .board .m__time--tbd{background:transparent;color:#9fb0cc;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+
+/* ===================== v2: айдентика і мобільна сітка матчів ===================== */
+/* шапка темна, зливається зі смугою розділу */
+.site-head{background:var(--ink);border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{color:#fff;gap:12px}
+.logo__mark{width:40px;height:40px;border-radius:0;background:none;box-shadow:none;flex:none}
+.logo__words{display:flex;flex-direction:column;line-height:1}
+.logo__w1{font:800 19px/1 var(--f-display);letter-spacing:-.02em}
+.logo__w2{font:600 13px/1.2 var(--f-text);color:var(--yellow);letter-spacing:.02em;margin-top:3px}
+.site-nav a{color:#dbe3f0}
+.site-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.site-nav a[aria-current]{background:var(--yellow);color:var(--ink)}
+.nav-toggle{color:#fff;border-color:rgba(255,255,255,.3)}
+@media (max-width:860px){.site-nav{background:var(--ink);top:72px;border-bottom:1px solid rgba(255,255,255,.1)}}
+.site-head__in{min-height:72px}
+.crumbs-bar{background:var(--ink);border-top:1px solid rgba(255,255,255,.06)}
+.crumbs ol{color:#9fb0cc;padding:10px 16px 0}
+.crumbs a{color:#c9d4e6}
+.crumbs li+li::before{color:#4a5d80}
+.crumbs-bar:not(:has(+ .band)){padding-bottom:12px}
+.band{padding-top:18px}
+
+/* статистика в смузі хабу */
+.band__stats{display:flex;flex-wrap:wrap;gap:12px 40px;margin:18px 0 0}
+.band__stats div{display:flex;flex-direction:column;gap:4px}
+.band__stats dt{font-size:13px;color:#9fb0cc}
+.band__stats dd{margin:0;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.season-bar{display:inline-block;width:140px;height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden}
+.season-bar span{display:block;height:100%;background:var(--yellow)}
+
+/* емблема клубу (заглушка: у робочій версії — логотип з API) */
+.crest{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--c-bg);color:var(--c-fg);
+  font:700 10px/1 var(--f-text);letter-spacing:-.02em;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.crest--big{width:44px;height:44px;font-size:16px}
+.team{display:inline-flex;align-items:center;gap:10px}
+.toplist__name small{display:flex;align-items:center;gap:6px;margin-top:2px}
+.toplist__name small .crest{width:18px;height:18px;font-size:8px}
+
+/* матчі: стабільна сітка, однакова центральна колонка */
+.m{grid-template-columns:64px minmax(0,1fr) 64px minmax(0,1fr);gap:10px}
+.matches--wide .m{grid-template-columns:110px minmax(0,1fr) 64px minmax(0,1fr)}
+.m__home,.m__away{display:flex;align-items:center;gap:8px;min-width:0}
+.m__home{justify-content:flex-end;text-align:right}
+.m__name{min-width:0;overflow-wrap:anywhere;line-height:1.25}
+.m__score,.m__time{min-width:0;width:64px;justify-self:center}
+.board .m__home,.board .m__away{font:600 16px/1.25 var(--f-text)}
+.board .m__time,.board .m__score{font-size:16px}
+@media (max-width:560px){
+  .m,.matches--wide .m{grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);grid-template-areas:"date date date" "home mid away";gap:4px 8px;padding:10px 0}
+  .m__date{grid-area:date;flex-direction:row;gap:8px;font-size:12px}
+  .m__home{grid-area:home}.m__away{grid-area:away}
+  .m__score,.m__time{grid-area:mid;width:58px;font-size:14px}
+  .m__home .crest,.m__away .crest{width:20px;height:20px;font-size:9px}
+  .board .m__home,.board .m__away{font-size:15px}
+  .board{padding:16px 14px 18px}
+  .band__stats{gap:12px 24px}
+}
+
+/* наступний матч збірної */
+.nextmatch__team{display:flex;align-items:center;gap:14px}
+.nextmatch__team:last-child{flex-direction:row-reverse;text-align:right}
+@media (max-width:560px){.nextmatch__team,.nextmatch__team:last-child{flex-direction:column;gap:8px}}
+.matchcard__team{display:flex;align-items:center;gap:12px}
+.matchcard__team:nth-child(3){justify-content:flex-end}
+
+/* новини з фото (заглушка — газон; у робочій версії мініатюра запису) */
+.news__img{display:block;border-radius:6px;aspect-ratio:16/9;
+  background:radial-gradient(circle at 50% 50%,transparent 17%,rgba(255,255,255,.55) 17.5%,rgba(255,255,255,.55) 18.5%,transparent 19%),
+  linear-gradient(90deg,transparent calc(50% - 1px),rgba(255,255,255,.55) calc(50% - 1px),rgba(255,255,255,.55) calc(50% + 1px),transparent calc(50% + 1px)),
+  repeating-linear-gradient(90deg,#2e7a4c 0 10%,#348654 10% 20%)}
+.news__item--lead{display:grid;gap:12px}
+.news__item--lead .news__txt{display:flex;flex-direction:column;gap:6px}
+.news__item--thumb{display:grid;grid-template-columns:132px minmax(0,1fr);gap:16px;align-items:start}
+.news__item--thumb .news__txt{display:flex;flex-direction:column;gap:4px}
+@media (max-width:520px){.news__item--thumb{grid-template-columns:96px minmax(0,1fr);gap:12px}.news__item--thumb .news__txt a{font-size:15px}}
+.grid__main .news__item--lead{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:center;padding-bottom:16px}
+@media (max-width:700px){.grid__main .news__item--lead{grid-template-columns:1fr}}
+
+/* підвал */
+.site-foot .logo__w2{color:var(--yellow)}
+/* v2.1 */
+.m__name{overflow-wrap:normal;word-break:normal;hyphens:manual}
+.board .matches{grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:0 32px}
+@media (max-width:560px){.board .matches{grid-template-columns:1fr}}
+.news__txt{display:flex;flex-direction:column;gap:4px}
