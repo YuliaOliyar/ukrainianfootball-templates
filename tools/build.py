@@ -504,18 +504,50 @@ body=head(pg)+league_band(pg,"zbirna-ukrayiny",zlg,"calendar",pg.h1,None,ztabs)+
 </main>
 '''+foot(pg); write(pg,body)
 
-# ---------------------------------------------------------------- Трансфери (рубрика-стрічка, без /news/)
-pg=Page("transfery-ukrayiny","Трансфери України: новини, чутки, підписання — Футбол України",
-        "Трансферні новини українського футболу: підписання, оренди, чутки та офіційні переходи гравців УПЛ і збірної.",
-        "Трансфери України",[("Головна",""),("Трансфери","transfery-ukrayiny")],"transfery-ukrayiny")
-body=head(pg)+f'''<div class="band"><div class="wrap"><div class="band__title"><h1>Трансфери України</h1></div>
-<p class="band__lead">Переходи, оренди та чутки про гравців українських клубів і легіонерів збірної.</p></div></div>
-<main id="main" class="wrap narrow">
-  {news_list(pg,"transfery-ukrayiny",TRANSFERS,big=True,thumbs=True)}
-  {pagination(pg,"transfery-ukrayiny",296)}
-  <p class="devnote">Окрему сторінку /transfery-ukrayiny/news/ не створюємо: вона веде 301 сюди, доки не з'явиться трансферна таблиця. Статті живуть за адресою /transfery-ukrayiny/news/{"{slug}"}/.</p>
-</main>
-'''+foot(pg); write(pg,body)
+# ---------------------------------------------------------------- Трансфери: хаб + /news/
+TR_TABS=[("","Огляд"),("news","Новини")]
+TR_DEMO=[("15.09","Прізвище Ім'я","Динамо","Полісся","Повний трансфер","не розголошується"),
+         ("12.09","Прізвище Ім'я","Динамо","Шахтар","Повний трансфер","€ 1,5 млн"),
+         ("12.09","Прізвище Ім'я","Динамо","Шахтар","Повний трансфер","€ 1,2 млн"),
+         ("10.09","Прізвище Ім'я","—","Буковина","Вільний агент","—"),
+         ("08.09","Прізвище Ім'я","Карпати","Верес","Оренда","—"),
+         ("05.09","Прізвище Ім'я","Зоря","Кривбас","Повний трансфер","€ 400 тис."),
+         ("03.09","Прізвище Ім'я","Шахтар","Колос","Оренда","—"),
+         ("01.09","Прізвище Ім'я","ЛНЗ","Епіцентр","Повернення з оренди","—")]
+TR_TOP=[("Прізвище Ім'я","Динамо","Шахтар","€ 1,5 млн"),("Прізвище Ім'я","Зоря","Кривбас","€ 400 тис."),
+        ("Прізвище Ім'я","Динамо","Полісся","сума не розголошується"),("Прізвище Ім'я","—","Буковина","вільний агент")]
+TTYPE={"Повний трансфер":"full","Оренда":"loan","Вільний агент":"free","Повернення з оренди":"back"}
+RUMORS=[t for t in TRANSFERS if t[1].startswith(("benfika","veres-buv"))]
+tbase=[("Головна",""),("Трансфери","transfery-ukrayiny")]
+pg=Page("transfery-ukrayiny","Трансфери України: таблиця переходів, чутки, новини — Футбол України",
+        "Трансфери клубів УПЛ: хто прийшов і пішов, суми переходів, оренди, чутки та останні трансферні новини.",
+        "Трансфери України",tbase,"transfery-ukrayiny")
+tfaq=[("Коли відкрите трансферне вікно в Україні?","Двічі на сезон: літнє вікно перед стартом чемпіонату і зимове під час перерви. Точні дати щороку затверджує УАФ."),
+      ("Чим оренда відрізняється від трансферу?","Під час оренди гравець тимчасово виступає за інший клуб і повертається після її завершення. Під час трансферу його контракт переходить до нового клубу."),
+      ("Звідки дані в таблиці переходів?","Офіційні переходи підтягуються автоматично з футбольної бази даних. Чутки — матеріали редакції, вони позначені окремо.")]
+fh,fl=faq_block(tfaq)
+clubs=sorted({r[0] for r in LEAGUES["upl"]["table"]})
+opts="".join(f'<option value="{E(c)}">{E(c)}</option>' for c in clubs)
+def _club(c): return f'<span class="team">{crest(c) if c!="—" else ""}{E(c)}</span>'
+rows="".join(f'<tr data-from="{E(f)}" data-to="{E(t)}"><td class="c-date">{d}</td><th scope="row" class="c-team">{E(n)}</th><td class="c-tr">{_club(f)}</td><td class="c-tr">{_club(t)}</td><td><span class="ttype ttype--{TTYPE[ty]}">{E(ty)}</span></td><td class="c-fee">{E(fee)}</td></tr>' for d,n,f,t,ty,fee in TR_DEMO)
+cards="".join(f'<li class="tcard"><span class="tcard__name">{E(n)}</span><span class="tcard__route">{_club(f)}<span class="tcard__arrow" aria-label="до">→</span>{_club(t)}</span><span class="tcard__fee">{E(fee)}</span></li>' for n,f,t,fee in TR_TOP)
+body=head(pg,[fl])+league_band(pg,"transfery-ukrayiny",dict(season="2026/27"),"",pg.h1,"Переходи, оренди та чутки про гравців клубів УПЛ і легіонерів збірної. Офіційні трансфери оновлюються автоматично.",TR_TABS,
+     stats=[("Трансферне вікно УПЛ","закрите"),("Наступне вікно","зимове, дати затверджує УАФ")])
+body+='<main id="main" class="wrap">'
+body+=f'<section class="board" aria-labelledby="top-h"><div class="board__head"><h2 id="top-h">Головні трансфери літа 2026</h2><a href="#tablycya">Усі переходи</a></div><ul class="tcards" data-source="api:transfers">{cards}</ul><p class="devnote">Приклад заповнення: 4 найдорожчі переходи вікна з API.</p></section>'
+body+='<div class="grid"><div class="grid__main">'
+body+=f'<section class="panel"><div class="panel__head"><h2>Новини</h2><a href="{pg.u("transfery-ukrayiny/news")}">Усі трансферні новини</a></div>{news_list(pg,"transfery-ukrayiny",TRANSFERS,5,big=True)}</section>'
+body+=f'<section class="panel" id="tablycya" aria-labelledby="tt-h"><div class="panel__head"><h2 id="tt-h">Переходи клубів УПЛ</h2><label class="tfilter">Клуб <select id="club-filter"><option value="">Усі клуби</option>{opts}</select></label></div>'
+body+=f'<div class="tbl-scroll"><table class="standings transfers" data-source="api:transfers"><thead><tr><th scope="col" class="c-date">Дата</th><th scope="col" class="c-team">Гравець</th><th scope="col" class="c-tr">Звідки</th><th scope="col" class="c-tr">Куди</th><th scope="col">Тип</th><th scope="col" class="c-fee">Сума</th></tr></thead><tbody>{rows}</tbody></table></div>'
+body+='<p class="tempty" hidden>У цього клубу немає переходів у поточному вікні.</p><p class="devnote">Приклад заповнення. У робочій версії рядки приходять з API Sportmonks (Transfers latest / by team): лише клуби УПЛ, поточне і попереднє вікно.</p></section></div>'
+body+=f'<aside class="grid__side"><section class="panel"><div class="panel__head"><h2>Чутки</h2></div>{news_list(pg,"transfery-ukrayiny",RUMORS)}<p class="devnote">Статті редакції з тегом «Чутки».</p></section></aside></div>'
+body+=f'<section class="about"><h2>Про трансфери</h2><div class="faq">{fh}</div></section></main>'
+body+=foot(pg); write(pg,body)
+
+pg=Page("transfery-ukrayiny/news","Трансферні новини українського футболу — Футбол України",
+        "Усі трансферні новини: підписання, оренди, продажі та чутки про гравців українських клубів.",
+        "Трансферні новини",tbase+[("Новини","transfery-ukrayiny/news")],"transfery-ukrayiny")
+body=head(pg)+league_band(pg,"transfery-ukrayiny",dict(season="2026/27"),"news",pg.h1,None,TR_TABS)+f'<main id="main" class="wrap narrow">{news_list(pg,"transfery-ukrayiny",TRANSFERS,big=True,thumbs=True)}{pagination(pg,"transfery-ukrayiny/news",296)}</main>'+foot(pg); write(pg,body)
 
 # ---------------------------------------------------------------- шаблон статті
 slug="polissya-majzhe-ves-match-u-menshosti-vyrvalo-volovu-peremogu-nad-dynamo-kyyiv-u-matchi-upl"

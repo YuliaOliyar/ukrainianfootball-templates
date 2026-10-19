@@ -17,7 +17,8 @@ upl/bombardyry/2025-2026/   архів сезону
 persha-liga/ …         хаб, news, table, calendar, bombardyry
 druga-liga/ …          те саме, таблиці й календар по групах А і Б
 zbirna-ukrayiny/       хаб, news, calendar
-transfery-ukrayiny/    рубрика-стрічка (без окремої /news/)
+transfery-ukrayiny/    трансферний хаб (головні трансфери, таблиця переходів з фільтром, чутки)
+transfery-ukrayiny/news/   архів трансферних новин
 tools/build.py         генератор шаблонів (python3 tools/build.py)
 ```
 
@@ -32,13 +33,13 @@ tools/build.py         генератор шаблонів (python3 tools/build.
 | `/{ліга}/calendar/` | `page-calendar.php` | API fixtures by season, відкривати на поточному турі |
 | `/{ліга}/bombardyry/` | `page-scorers.php` | API topscorers |
 | `/zbirna-ukrayiny/calendar/` | `page-calendar.php` | API fixtures by team |
+| `/transfery-ukrayiny/` хаб | `category-transfery-ukrayiny.php` | API transfers (latest / by team) + 5 новин + тег «Чутки»; статус і дати вікна — вручну |
 
 Елементи з даними позначені атрибутом `data-source` (`api:…` — API, `wp:thumbnail` — мініатюра запису).
 
 ## Правила проти дублів
 
 - На хабі максимум 5 новин, без пагінації. Пагінація тільки на `/news/page/N/`; старі `/{рубрика}/page/N/` — 301 туди.
-- `/transfery-ukrayiny/news/` не створюється: 301 на `/transfery-ukrayiny/` до запуску трансферного хабу.
 - Архів бомбардирів сезону створюється тільки після завершення сезону.
 
 ## Що замінити перед запуском
