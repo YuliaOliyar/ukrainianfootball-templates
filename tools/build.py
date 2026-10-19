@@ -165,6 +165,7 @@ def head(pg, extra_ld=None):
 <meta property="og:url" content="{canon}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="uk_UA">
+<link rel="icon" href="{pg.u("").replace("index.html","")}assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
@@ -175,7 +176,7 @@ def head(pg, extra_ld=None):
 <a class="skip" href="#main">Перейти до вмісту</a>
 <header class="site-head">
   <div class="wrap site-head__in">
-    <a class="logo" href="{pg.u("")}" aria-label="Футбол України — на головну"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#ffd23f"/><circle cx="20" cy="20" r="12.5" fill="#13213c"/><path d="M20 13.4l6.2 4.5-2.4 7.3h-7.6l-2.4-7.3z" fill="#ffd23f"/><path d="M20 7.6v5.8M26.2 17.9l5.8-1.9M23.8 25.2l3.5 4.8M16.2 25.2l-3.5 4.8M13.8 17.9L8 16" stroke="#ffd23f" stroke-width="1.7" fill="none"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
+    <a class="logo" href="{pg.u("")}" aria-label="Футбол України — на головну"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><path d="M20 2.5L35.5 7.5V20c0 9.2-6.6 15.4-15.5 18-8.9-2.6-15.5-8.8-15.5-18V7.5z" fill="#ffd23f"/><path d="M20 2.5L35.5 7.5V21H4.5V7.5z" fill="#1c4fd6"/><path d="M20 2.5L35.5 7.5V20c0 9.2-6.6 15.4-15.5 18-8.9-2.6-15.5-8.8-15.5-18V7.5z" fill="none" stroke="#13213c" stroke-width="2"/><circle cx="20" cy="20.5" r="8" fill="#fff" stroke="#13213c" stroke-width="1.6"/><path d="M20 16.6l3.7 2.7-1.4 4.3h-4.6l-1.4-4.3z" fill="#13213c"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Меню</button>
     <nav id="site-nav" class="site-nav" aria-label="Розділи"><ul>{nav}</ul></nav>
   </div>
@@ -188,7 +189,7 @@ def foot(pg):
     js=pg.u("").replace("index.html","")+"assets/js/main.js"
     return f'''<footer class="site-foot">
   <div class="wrap site-foot__in">
-    <a class="logo logo--foot" href="{pg.u("")}"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#ffd23f"/><circle cx="20" cy="20" r="12.5" fill="#13213c"/><path d="M20 13.4l6.2 4.5-2.4 7.3h-7.6l-2.4-7.3z" fill="#ffd23f"/><path d="M20 7.6v5.8M26.2 17.9l5.8-1.9M23.8 25.2l3.5 4.8M16.2 25.2l-3.5 4.8M13.8 17.9L8 16" stroke="#ffd23f" stroke-width="1.7" fill="none"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
+    <a class="logo logo--foot" href="{pg.u("")}"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><path d="M20 2.5L35.5 7.5V20c0 9.2-6.6 15.4-15.5 18-8.9-2.6-15.5-8.8-15.5-18V7.5z" fill="#ffd23f"/><path d="M20 2.5L35.5 7.5V21H4.5V7.5z" fill="#1c4fd6"/><path d="M20 2.5L35.5 7.5V20c0 9.2-6.6 15.4-15.5 18-8.9-2.6-15.5-8.8-15.5-18V7.5z" fill="none" stroke="#13213c" stroke-width="2"/><circle cx="20" cy="20.5" r="8" fill="#fff" stroke="#13213c" stroke-width="1.6"/><path d="M20 16.6l3.7 2.7-1.4 4.3h-4.6l-1.4-4.3z" fill="#13213c"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
     <ul class="site-foot__nav">{links}</ul>
     <p class="site-foot__copy">© 2026 «Футбол України». Дані турнірних таблиць і календарів оновлюються автоматично.</p>
   </div>

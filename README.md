@@ -55,7 +55,7 @@ tools/build.py         генератор шаблонів (python3 tools/build.
 
 - Шрифти: Unbounded (заголовки, табло, позиції) і Onest (текст, таблиці, назви команд), обидва з кирилицею, Google Fonts.
 - Кольори: темно-синій `#13213c`, фон `#eef2f7`, посилання `#1c4fd6`, акцент жовтий `#ffd23f`.
-- Логотип — SVG у шапці (м'яч на жовтому квадраті + «Футбол / України»).
+- Логотип «Щит» — SVG у шапці й підвалі; окремі файли в `assets/img/`: `logo-mark.svg` (знак), `logo-dark.svg` (на темному), `logo-light.svg` (на світлому), `favicon.svg` (іконка вкладки).
 - Зони таблиці: єврокубки — синя смуга, підвищення — зелена, плей-оф — жовта, пониження — червона.
 - Адаптив від 360 px, видимий фокус клавіатури, `prefers-reduced-motion`.
 - SEO: title, description, canonical, Open Graph, JSON-LD BreadcrumbList, FAQPage на хабах, NewsArticle у статті.
