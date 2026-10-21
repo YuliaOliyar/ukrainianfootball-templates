@@ -331,3 +331,9 @@ html{scroll-behavior:smooth}
 .ttype--free{background:#dff3e8;color:#1f6b46}.ttype--back{background:#eceff4;color:#4a5a73}
 .tempty{color:var(--muted);font-size:14px}
 @media (max-width:620px){.transfers .c-date,.transfers .c-fee{display:none}}
+/* v4.1: матчі у вузькій бічній колонці — дата окремим рядком, як на телефоні */
+.grid__side .m,.grid__side .matches--wide .m{grid-template-columns:minmax(0,1fr) 58px minmax(0,1fr);grid-template-areas:"date date date" "home mid away";gap:4px 8px;padding:10px 0}
+.grid__side .m__date{grid-area:date;flex-direction:row;flex-wrap:wrap;gap:4px 8px;font-size:13px}
+.grid__side .m__home{grid-area:home}.grid__side .m__away{grid-area:away}
+.grid__side .m__score,.grid__side .m__time{grid-area:mid;width:58px;font-size:15px}
+.grid__side .m__home .crest,.grid__side .m__away .crest{width:20px;height:20px;font-size:9px}

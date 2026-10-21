@@ -224,7 +224,7 @@ def crest(name, big=False):
     if len(w)>1: ini=(w[0][0]+w[1][0])
     elif name.isupper() and len(name)<=3: ini=name
     else: ini=name[0]
-    bg,fg=PAL[_z.crc32(name.encode())%len(PAL)]
+    bg,fg=("#1c4fd6","#ffd23f") if name=="Україна" else PAL[_z.crc32(name.encode())%len(PAL)]
     return f'<span class="crest{" crest--big" if big else ""}" style="--c-bg:{bg};--c-fg:{fg}" aria-hidden="true" data-source="api:team.logo">{E(ini.upper())}</span>'
 def pts_word(n):
     m=n%10; h=n%100
