@@ -19,6 +19,13 @@ druga-liga/ …          те саме, таблиці й календар по 
 zbirna-ukrayiny/       хаб, news, calendar
 transfery-ukrayiny/    трансферний хаб (головні трансфери, таблиця переходів з фільтром, чутки)
 transfery-ukrayiny/news/   архів трансферних новин
+live/                  матч-центр «Футбол онлайн» (рахунок наживо, фільтр Усі / Наживо / Завершені / Попереду)
+translyacziyi/         «Де дивитися»: розклад трансляцій на 7 днів (+ news/)
+gravczi/               гравці УПЛ: склади клубів з фільтром за клубом
+gravczi/pryklad-gravczya/  шаблон картки гравця
+statystyka/            хаб статистики: бомбардири, асистенти, картки, командні рекорди
+yevrokubky/            хаб єврокубків: матчі українських клубів у ЛЧ, ЛЄ, ЛК
+molod/                 хаб «Молодь» (+ news/, u19/, u21/)
 tools/build.py         генератор шаблонів (python3 tools/build.py)
 ```
 
@@ -33,6 +40,13 @@ tools/build.py         генератор шаблонів (python3 tools/build.
 | `/{ліга}/calendar/` | `page-calendar.php` | API fixtures by season, відкривати на поточному турі |
 | `/{ліга}/bombardyry/` | `page-scorers.php` | API topscorers |
 | `/zbirna-ukrayiny/calendar/` | `page-calendar.php` | API fixtures by team |
+| `/live/` | `page-live.php` | API livescores (inplay + today), оновлення 30–60 с під час матчів |
+| `/translyacziyi/` | `page-tv.php` | API fixtures between dates + tvStations; поле «Канал трансляції» для редактора |
+| `/gravczi/` | `page-players.php` | API squads by team + statistics |
+| `/gravczi/{slug}/` | `single-player.php` (або віртуальна сторінка) | API player by ID: position, nationality, teams, statistics.details, latest |
+| `/statystyka/` | `category-statystyka.php` | API topscorers (goals, assists, yellowcards), team statistics |
+| `/yevrokubky/` | `category-yevrokubky.php` | API fixtures by team (ліги ЛЧ, ЛЄ, ЛК), standings цих турнірів |
+| `/molod/`, `/molod/u19/`, `/molod/u21/` | `category-molod.php`, `page-table.php`, `page-calendar.php` | API: ліга U-19, відбір Євро U-21 |
 | `/transfery-ukrayiny/` хаб | `category-transfery-ukrayiny.php` | API transfers (latest / by team) + 5 новин + тег «Чутки»; статус і дати вікна — вручну |
 
 Елементи з даними позначені атрибутом `data-source` (`api:…` — API, `wp:thumbnail` — мініатюра запису).
@@ -41,6 +55,7 @@ tools/build.py         генератор шаблонів (python3 tools/build.
 
 - На хабі максимум 5 новин, без пагінації. Пагінація тільки на `/news/page/N/`; старі `/{рубрика}/page/N/` — 301 туди.
 - Архів бомбардирів сезону створюється тільки після завершення сезону.
+- Службові підсторінки рубрик (`u19`, `u21`, `rejtyng-fifa`, `rejtyng-uyefa`, `table`, `calendar`, `bombardyry`) — у винятках правила 301 «рубрика/slug → рубрика/news/slug».
 
 ## Що замінити перед запуском
 
@@ -49,7 +64,7 @@ tools/build.py         генератор шаблонів (python3 tools/build.
 - `.news__img` (газон) — заглушка фото, замінити на мініатюру запису.
 - «Прізвище Ім'я» у бомбардирах — приклад, дані з API.
 - Архів УПЛ 2025/26 перенесено зі старої сторінки як є (7 рядків) — замінити підсумковою таблицею сезону.
-- Таблиці, календарі, новини — знімок сайту на 19.10.2026.
+- Таблиці, календарі, новини — знімок сайту на 19.10.2026. На нових сторінках (live, трансляції, гравці, статистика, єврокубки, молодь) дані умовні.
 - Зверстана одна стаття (`upl/news/polissya-…/`); решта посилань на статті й пагінацію ведуть на адреси нової структури і запрацюють після перенесення у WP.
 
 ## Дизайн

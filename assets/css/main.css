@@ -337,3 +337,50 @@ html{scroll-behavior:smooth}
 .grid__side .m__home{grid-area:home}.grid__side .m__away{grid-area:away}
 .grid__side .m__score,.grid__side .m__time{grid-area:mid;width:58px;font-size:15px}
 .grid__side .m__home .crest,.grid__side .m__away .crest{width:20px;height:20px;font-size:9px}
+/* ---- Нові сторінки з API: матч-центр, трансляції, гравці, статистика, єврокубки, молодь */
+.livebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}
+.livebar .updated{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 14px/1 var(--f-text);padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.m__live{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:#cf3b2f}
+.m__live::before{content:"";width:8px;height:8px;border-radius:50%;background:#cf3b2f;animation:uf-pulse 1.4s ease-in-out infinite}
+@keyframes uf-pulse{50%{opacity:.25}}
+.m__ft,.m__ns{font-size:13px;color:var(--muted)}
+.m--live{background:#fff6f5}
+.m__score--live{background:#cf3b2f;color:#fff}
+.matches .m-ev{list-style:none;padding:4px 12px 10px;font-size:13px;color:var(--muted);border-top:0;text-align:center}
+.tvlist .c-team{white-space:normal}
+.tvlist .vs{color:var(--muted)}
+.tvlist .c-date{font-weight:700;width:64px}
+.tv{display:inline-block;font-size:13px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--paper);border:1px solid var(--line);white-space:nowrap}
+.players .c-team a{color:var(--ink);font-weight:600;text-decoration:none}
+.players .c-team a:hover{color:var(--blue);text-decoration:underline}
+.profile{display:flex;align-items:center;gap:18px;margin-bottom:8px}
+.profile h1{margin:0}
+.profile .band__lead{margin:6px 0 0}
+.profile__photo{flex:none;width:88px;height:88px;border-radius:50%;background:var(--ink-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='15' r='7' fill='%23ffffff55'/%3E%3Cpath d='M6 38c1-8 7-12 14-12s13 4 14 12z' fill='%23ffffff55'/%3E%3C/svg%3E") center/70% no-repeat;border:3px solid var(--yellow)}
+.facts{margin:0}
+.facts div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+.facts div:first-child{border-top:0}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;font-weight:600;text-align:right}
+.pstats .total th,.pstats .total td{font-weight:700;border-top:2px solid var(--ink)}
+.lcards{list-style:none;margin:0 0 20px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.lcard{background:var(--ink);color:#fff;border-radius:var(--r);padding:16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline}
+.lcard__t{flex:1 0 100%;font:700 18px/1.2 var(--f-display)}
+.lcard a{color:var(--yellow);font-weight:600}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.statgrid .panel{margin:0 0 16px}
+.tstats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tstats li{background:var(--paper);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px}
+.tstats__l{font-size:13px;color:var(--muted)}
+.tstats__t{font-weight:600}
+.tstats__v{font:700 20px/1.2 var(--f-display)}
+@media (max-width:860px){.lcards,.statgrid{grid-template-columns:1fr}.tstats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.tstats{grid-template-columns:1fr}.profile__photo{width:64px;height:64px}}
+@media (prefers-reduced-motion:reduce){.m__live::before{animation:none}}
+.grid>*{min-width:0}
+.band:has(.profile){padding-bottom:24px}
+.band:has(.profile)+main{padding-top:24px}

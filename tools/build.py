@@ -583,11 +583,246 @@ body=head(pg,[art_ld])+f'''
 </main>
 '''+foot(pg); write(pg,body)
 
+# ---------------------------------------------------------------- нові сторінки з API (завдання листопад 2026)
+def DEMO_NOTE(t): return f'<p class="devnote">{t}</p>'
+def tabs_band(pg, key, active, h1, lead, tabs, stats=None, season=True):
+    return league_band(pg, key, dict(season="2026/27" if season else ""), active, h1, lead, tabs, stats)
+def demo_news(prefix, slugbase, n=6):
+    return [(f"{prefix}: приклад заголовка новини {i+1}", f"{slugbase}-pryklad-{i+1}", f"{24-i:02d}.10.2026 1{i%10}:0{i%6}") for i in range(n)]
+UPLN=LEAGUES["upl"]["news"]
+
+# ---- /live/ — матч-центр
+def live_rows(ms):
+    out=""
+    for st,tm,h,a,sc,ev in ms:
+        if st=="live": mid=f'<span class="m__score m__score--live">{E(sc)}</span>'; dt=f'<span class="m__live">{E(tm)}</span>'
+        elif st=="ft": mid=f'<span class="m__score">{E(sc)}</span>'; dt='<span class="m__ft">Завершено</span>'
+        else: mid=f'<span class="m__time">{E(tm)}</span>'; dt='<span class="m__ns">Попереду</span>'
+        out+=f'<li class="m m--{st}{" m--played" if st!="ns" else ""}" data-state="{st}"><span class="m__date">{dt}</span><span class="m__home"><span class="m__name">{E(h)}</span>{crest(h)}</span>{mid}<span class="m__away">{crest(a)}<span class="m__name">{E(a)}</span></span></li>'
+        if ev: out+=f'<li class="m-ev" data-state="{st}"><span aria-hidden="true">⚽</span> {E(ev)}</li>'
+    return f'<ul class="matches matches--live" data-source="api:livescores">{out}</ul>'
+LIVE=[("УПЛ, 10-й тур","upl",[("ft","","Лівий Берег","ЛНЗ","1:0","27′ Прізвище І."),("live","67′","Епіцентр","Харків","1:1","12′ Прізвище І. · 54′ Прізвище І. (пен.)"),("ns","18:00","Шахтар","Зоря","","")]),
+      ("Перша ліга, 13-й тур","persha-liga",[("ft","","Вікторія","Полтава","2:0","8′ Прізвище І. · 71′ Прізвище І."),("live","34′","Металіст","Інгулець","0:0",""),("ns","17:00","Чернігів","ЮКСА","","")]),
+      ("Друга ліга, група А","druga-liga",[("live","Перерва","Брацлав","Поділля","1:0","41′ Прізвище І."),("ns","16:00","Нива Вінниця","Скала 1911","","")])]
+pg=Page("live","Футбол онлайн: рахунок матчів наживо — Футбол України",
+        "Матч-центр: усі матчі УПЛ, Першої та Другої ліг і Кубка України сьогодні — рахунок наживо, хвилина, автори голів.",
+        "Футбол онлайн",[("Головна",""),("Футбол онлайн","live")],"live")
+filt='<div class="chips" role="group" aria-label="Фільтр матчів"><button class="chip" aria-pressed="true" data-f="">Усі</button><button class="chip" aria-pressed="false" data-f="live">Наживо</button><button class="chip" aria-pressed="false" data-f="ft">Завершені</button><button class="chip" aria-pressed="false" data-f="ns">Попереду</button></div>'
+secs="".join(f'<section class="panel"><div class="panel__head"><h2>{E(t)}</h2><a href="{pg.u(k+"/calendar")}">Календар</a></div>{live_rows(ms)}</section>' for t,k,ms in LIVE)
+body=head(pg)+tabs_band(pg,"live","",pg.h1,"Усі матчі українського футболу сьогодні. Рахунок оновлюється автоматично кожні 30 секунд.",[("","Сьогодні")],season=False,
+     stats=[("Сьогодні, 24 жовтня","8 матчів"),("Наживо","3")])+f'''
+<main id="main" class="wrap narrow">
+  <div class="livebar">{filt}<p class="updated">Оновлено <time datetime="2026-10-24T16:42">16:42</time></p></div>
+  {secs}
+  {DEMO_NOTE("Приклад заповнення. Дані: API Sportmonks Livescores (inplay + today), include participants, scores, state, events, league; ліги УПЛ, Перша, Друга, Кубок. Під час матчів оновлення кожні 30–60 с, в інший час раз на годину. Якщо сьогодні матчів немає — блок «Найближчі матчі» (Fixtures between dates).")}
+</main>
+'''+foot(pg); write(pg,body)
+
+# ---- /translyacziyi/ — де дивитися
+TV=[("Пʼятниця, 23 жовтня",[("13:00","Динамо","Кудрівка","УПЛ","УПЛ ТБ"),("14:00","Агробізнес","Олександрія","Перша ліга","YouTube ПФЛ"),("15:30","Полісся","Оболонь","УПЛ","УПЛ ТБ"),("15:30","Верес","Колос","УПЛ","УПЛ ТБ")]),
+    ("Субота, 24 жовтня",[("13:00","Лівий Берег","ЛНЗ","УПЛ","УПЛ ТБ"),("13:00","Брацлав","Поділля","Друга ліга","YouTube ПФЛ"),("15:30","Епіцентр","Харків","УПЛ","УПЛ ТБ"),("18:00","Шахтар","Зоря","УПЛ","УПЛ ТБ")]),
+    ("Неділя, 25 жовтня",[("13:00","Чорноморець","Карпати","УПЛ","УПЛ ТБ"),("15:30","Буковина","Кривбас","УПЛ","УПЛ ТБ")])]
+trtabs=[("","Розклад"),("news","Новини")]; trbase=[("Головна",""),("Де дивитися","translyacziyi")]
+def tv_table(rows):
+    b="".join(f'<tr><td class="c-date">{t}</td><th scope="row" class="c-team"><span class="team">{crest(h)}{E(h)}</span> <span class="vs">—</span> <span class="team">{crest(a)}{E(a)}</span></th><td class="c-club">{E(l)}</td><td><span class="tv">{E(ch)}</span></td></tr>' for t,h,a,l,ch in rows)
+    return f'<div class="tbl-scroll"><table class="standings tvlist" data-source="api:fixtures.tvstations"><thead><tr><th scope="col" class="c-date">Час</th><th scope="col" class="c-team">Матч</th><th scope="col" class="c-club">Турнір</th><th scope="col">Де дивитися</th></tr></thead><tbody>{b}</tbody></table></div>'
+pg=Page("translyacziyi","Де дивитися футбол: розклад трансляцій матчів УПЛ на тиждень — Футбол України",
+        "Розклад трансляцій українського футболу на 7 днів: УПЛ, Перша і Друга ліги, Кубок, збірна. Час початку і канал для кожного матчу.",
+        "Де дивитися футбол",trbase,"translyacziyi")
+tvfaq=[("Де дивитися матчі УПЛ?","Канал для кожного матчу вказаний у розкладі. Розклад оновлюється, щойно ліга оголошує трансляції туру."),
+       ("Чи можна дивитися матчі Першої та Другої ліг безкоштовно?","Більшість матчів ПФЛ транслює YouTube-канал ліги, посилання є в розкладі.")]
+fh,fl=faq_block(tvfaq)
+days="".join(f'<section class="panel"><h2 class="panel__title">{E(d)}</h2>{tv_table(r)}</section>' for d,r in TV)
+body=head(pg,[fl])+tabs_band(pg,"translyacziyi","",pg.h1,"Розклад трансляцій на сім днів уперед для всіх турнірів, які ми висвітлюємо. Час київський.",trtabs,season=False)+f'''
+<main id="main" class="wrap narrow">
+  {days}
+  {DEMO_NOTE("Приклад заповнення. Дані: API Sportmonks Fixtures between dates (сьогодні + 7 днів) з include tvStations, фільтр країни Україна. Якщо API не віддає канал, показувати значення поля «Канал трансляції», яке заповнює редактор у картці матчу.")}
+  <section class="about"><h2>Питання</h2><div class="faq">{fh}</div></section>
+</main>
+'''+foot(pg); write(pg,body)
+TRN=demo_news("Трансляції","de-dyvytysya",8)
+pg=Page("translyacziyi/news","Де дивитися матчі онлайн: новини про трансляції — Футбол України","Статті про трансляції: де дивитися матчі українських клубів і збірної онлайн та по ТБ.",
+        "Новини про трансляції",trbase+[("Новини","translyacziyi/news")],"translyacziyi")
+body=head(pg)+tabs_band(pg,"translyacziyi","news",pg.h1,None,trtabs,season=False)+f'<main id="main" class="wrap narrow">{news_list(pg,"translyacziyi",TRN,big=True,thumbs=True)}{pagination(pg,"translyacziyi/news",3)}</main>'+foot(pg); write(pg,body)
+
+# ---- /gravczi/ і картка гравця
+POS=["Воротар","Захисник","Захисник","Півзахисник","Півзахисник","Нападник"]
+UPLC=sorted({r[0] for r in LEAGUES["upl"]["table"]})
+PLAYERS=[("Прізвище Ім'я", c, POS[(i+j*2)%6], (i*7+j*5)%30+1, 19+(i*3+j)%14, 9-(j%3), [3,0,1,4,2,0][(i+j)%6]) for i,c in enumerate(UPLC[:6]) for j in range(3)]
+gbase=[("Головна",""),("Гравці","gravczi")]
+pg=Page("gravczi","Гравці УПЛ 2026/27: склади клубів і статистика — Футбол України",
+        "Усі гравці клубів УПЛ: позиція, номер, вік, матчі та голи в сезоні 2026/27. Фільтр за клубом.",
+        "Гравці УПЛ",gbase,"gravczi")
+opts="".join(f'<option value="{E(c)}">{E(c)}</option>' for c in UPLC)
+prow="".join(f'<tr data-club="{E(c)}"><td class="c-pos">{num}</td><th scope="row" class="c-team"><a href="{pg.u("gravczi/pryklad-gravczya")}">{E(n)}</a></th><td class="c-tr">{_club(c)}</td><td class="c-club">{E(p)}</td><td>{age}</td><td>{m}</td><td class="c-pts">{g}</td></tr>' for n,c,p,num,age,m,g in PLAYERS)
+body=head(pg)+tabs_band(pg,"gravczi","",pg.h1,"Склади всіх 16 клубів Прем'єр-ліги та статистика гравців у поточному сезоні.",[("","Усі гравці")])+f'''
+<main id="main" class="wrap">
+  <section class="panel"><div class="panel__head"><h2>Склади клубів</h2><label class="tfilter">Клуб <select id="club-filter"><option value="">Усі клуби</option>{opts}</select></label></div>
+  <div class="tbl-scroll"><table class="standings players" data-source="api:squads"><thead><tr><th scope="col" class="c-pos" title="Номер">№</th><th scope="col" class="c-team">Гравець</th><th scope="col" class="c-tr">Клуб</th><th scope="col" class="c-club">Позиція</th><th scope="col">Вік</th><th scope="col" title="Матчі">І</th><th scope="col" class="c-pts">Голи</th></tr></thead><tbody>{prow}</tbody></table></div>
+  <p class="tempty" hidden>Цей клуб є в повній версії, у прикладі — лише 6 клубів.</p>
+  {DEMO_NOTE("Приклад заповнення (6 клубів по 3 гравці). Дані: API Sportmonks Squads by team (поточний сезон) + statistics за сезон. Ім'я — посилання на /gravczi/{slug}/, slug — транслітерація імені. Сортування: клуб, позиція, номер.")}
+  </section>
+</main>
+'''+foot(pg); write(pg,body)
+
+pslug="gravczi/pryklad-gravczya"
+pg=Page(pslug,"Прізвище Ім'я — нападник Динамо: статистика 2026/27 — Футбол України",
+        "Прізвище Ім'я, нападник Динамо: матчі, голи, асисти та хвилини в сезоні 2026/27, останні матчі й новини.",
+        "Прізвище Ім'я",gbase+[("Прізвище Ім'я",pslug)],"gravczi")
+person={"@context":"https://schema.org","@type":"ProfilePage","url":D+"/"+pslug+"/","mainEntity":{"@type":"Person","name":"Прізвище Ім'я","jobTitle":"Футболіст","nationality":"Україна",
+        "affiliation":{"@type":"SportsTeam","name":"Динамо","url":D+"/kluby/dynamo/"}}}
+seas=[("УПЛ",9,7,612,5,2,1,0),("Кубок України",1,1,90,1,0,0,0),("Ліга Європи",3,3,245,1,1,1,0)]
+srow="".join(f'<tr><th scope="row" class="c-team">{E(t)}</th><td>{m}</td><td>{s}</td><td>{mi}</td><td class="c-pts">{g}</td><td>{a}</td><td>{y}</td><td>{r}</td></tr>' for t,m,s,mi,g,a,y,r in seas)
+tot=[sum(x[i] for x in seas) for i in range(1,8)]
+srow+='<tr class="total"><th scope="row" class="c-team">Усього</th>'+"".join(('<td class="c-pts">' if i==3 else '<td>')+f'{v}</td>' for i,v in enumerate(tot))+'</tr>'
+plast=[("18.10.2026","","Полісся","Динамо","3:1","УПЛ · 90′ · 1 гол"),("11.10.2026","","Динамо","Карпати","1:0","УПЛ · 78′"),("02.10.2026","","Динамо","Суперник","2:2","Ліга Європи · 90′ · асист")]
+info=[("Позиція","Нападник"),("Номер","9"),("Клуб",f'<a href="{pg.u("kluby/dynamo")}">Динамо</a>'),("Дата народження","01.01.2000 (26 років)"),("Громадянство","Україна"),("Зріст","185 см"),("Робоча нога","права")]
+facts="".join(f"<div><dt>{a}</dt><dd>{b}</dd></div>" for a,b in info)
+body=head(pg,[person])+f'''<div class="band"><div class="wrap">
+  <div class="profile"><span class="profile__photo" data-source="api:player.image_path" aria-hidden="true"></span><div><h1>{E(pg.h1)}</h1><p class="band__lead">Нападник · <span class="team">{crest("Динамо")}Динамо</span> · №9</p></div></div>
+  <dl class="band__stats" data-source="api:player.statistics"><div><dt>Матчі</dt><dd>13</dd></div><div><dt>Голи</dt><dd>7</dd></div><div><dt>Асисти</dt><dd>3</dd></div><div><dt>Хвилини</dt><dd>947</dd></div></dl>
+</div></div>
+<main id="main" class="wrap">
+  <div class="grid">
+    <div class="grid__main">
+      <section class="panel"><h2 class="panel__title">Статистика сезону 2026/27</h2>
+      <div class="tbl-scroll"><table class="standings pstats" data-source="api:player.statistics.details"><thead><tr><th scope="col" class="c-team">Турнір</th><th scope="col" title="Матчі">І</th><th scope="col" title="У старті">Ст.</th><th scope="col" title="Хвилини">Хв</th><th scope="col" class="c-pts">Голи</th><th scope="col" title="Асисти">Ас.</th><th scope="col" title="Жовті картки">ЖК</th><th scope="col" title="Червоні картки">ЧК</th></tr></thead><tbody>{srow}</tbody></table></div></section>
+      <section class="panel"><h2 class="panel__title">Останні матчі</h2>{zb_rows(plast)}</section>
+      <section class="panel"><div class="panel__head"><h2>Новини про гравця</h2></div>{news_list(pg,"upl",UPLN,3)}{DEMO_NOTE("Статті WordPress з міткою гравця.")}</section>
+    </div>
+    <aside class="grid__side">
+      <section class="panel"><h2 class="panel__title">Профіль</h2><dl class="facts" data-source="api:player">{facts}</dl></section>
+      {DEMO_NOTE("Приклад заповнення. Дані: API Sportmonks Player by ID, include position, nationality, teams, statistics.details (сезон 2026/27), latest fixtures. Фото — image_path з API. Розмітка ProfilePage + Person. Сторінка створюється автоматично для кожного гравця заявки УПЛ.")}
+    </aside>
+  </div>
+</main>
+'''+foot(pg); write(pg,body)
+
+# ---- /statystyka/ — хаб
+stbase=[("Головна",""),("Статистика","statystyka")]
+sttabs=[("","Огляд"),("news","Новини")]
+def toplist(rows):
+    return '<ol class="toplist" data-source="api:topscorers">'+"".join(f'<li><span class="toplist__name">{E(n)}<small>{crest(c)}{E(c)}</small></span><span class="toplist__val">{v}</span></li>' for n,c,v in rows)+'</ol>'
+up=[r[0] for r in LEAGUES["upl"]["table"]]
+def pl(vals, sh=0): return [("Прізвище Ім'я",up[(i*5+sh)%16],v) for i,v in enumerate(vals)]
+team_st=[("Найкраща атака","Шахтар, Полісся","20 голів"),("Найкраща оборона","Шахтар","5 пропущених"),("Найбільше сухих матчів","Шахтар","6"),("Найдовша серія без поразок","Полісся","7 матчів")]
+pg=Page("statystyka","Статистика УПЛ 2026/27: бомбардири, асистенти, картки — Футбол України",
+        "Статистика українського футболу: найкращі бомбардири й асистенти УПЛ, картки, командні рекорди сезону 2026/27 та таблиці всіх ліг.",
+        "Статистика українського футболу",stbase,"statystyka")
+lcards="".join(f'<li class="lcard"><span class="lcard__t">{E(LEAGUES[k]["name"])}</span><a href="{pg.u(k+"/table")}">Таблиця</a><a href="{pg.u(k+"/bombardyry")}">Бомбардири</a><a href="{pg.u(k+"/calendar")}">Календар</a></li>' for k in ["upl","persha-liga","druga-liga"])
+tst="".join(f'<li><span class="tstats__l">{E(a)}</span><span class="tstats__t">{E(b)}</span><span class="tstats__v">{E(c)}</span></li>' for a,b,c in team_st)
+body=head(pg)+tabs_band(pg,"statystyka","",pg.h1,"Головні цифри сезону 2026/27: хто забиває, хто віддає гольові передачі, які команди найкращі в атаці та обороні.",sttabs)+f'''
+<main id="main" class="wrap">
+  <ul class="lcards">{lcards}</ul>
+  <div class="statgrid">
+    <section class="panel"><div class="panel__head"><h2>Бомбардири УПЛ</h2><a href="{pg.u("upl/bombardyry")}">Усі</a></div>{toplist(pl([8,7,7,6,5]))}</section>
+    <section class="panel"><div class="panel__head"><h2>Асистенти УПЛ</h2></div>{toplist(pl([5,4,4,3,3],2))}</section>
+    <section class="panel"><div class="panel__head"><h2>Жовті картки УПЛ</h2></div>{toplist(pl([5,4,4,4,3],7))}</section>
+  </div>
+  <section class="panel"><h2 class="panel__title">Командні рекорди УПЛ</h2><ul class="tstats" data-source="api:team.statistics">{tst}</ul></section>
+  {DEMO_NOTE("Приклад заповнення. Дані: API Sportmonks Topscorers by season (типи goals, assists, yellowcards), Team statistics by season. Оновлення після кожного туру.")}
+  <section class="panel"><div class="panel__head"><h2>Новини</h2><a href="{pg.u("statystyka/news")}">Усі новини</a></div>{news_list(pg,"statystyka",demo_news("Статистика","statystyka",5),5)}</section>
+</main>
+'''+foot(pg); write(pg,body)
+
+# ---- /yevrokubky/ — хаб
+ybase=[("Головна",""),("Єврокубки","yevrokubky")]
+ytabs=[("","Огляд"),("news","Новини"),("rejtyng-uyefa","Рейтинг УЄФА")]
+yup=[("06.11.2026","19:45","Динамо","Суперник","","Ліга Європи"),("06.11.2026","22:00","Суперник","Шахтар","","Ліга конференцій"),("27.11.2026","19:45","Полісся","Суперник","","Ліга конференцій")]
+yres=[("23.10.2026","","Шахтар","Суперник","2:0","Ліга конференцій"),("23.10.2026","","Суперник","Динамо","1:1","Ліга Європи"),("22.10.2026","","Полісся","Суперник","0:1","Ліга конференцій")]
+ycl=[("Динамо","Ліга Європи","основний етап",14,"5"),("Шахтар","Ліга конференцій","основний етап",6,"7"),("Полісся","Ліга конференцій","основний етап",22,"3")]
+pg=Page("yevrokubky","Українські клуби в єврокубках 2026/27: матчі, результати — Футбол України",
+        "Виступи українських клубів у Лізі чемпіонів, Лізі Європи та Лізі конференцій 2026/27: розклад, результати, місця в турнірних таблицях.",
+        "Українські клуби в єврокубках",ybase,"yevrokubky")
+yrows="".join(f'<tr><th scope="row" class="c-team">{_club(c)}</th><td class="c-club">{E(t)}</td><td class="c-club">{E(s)}</td><td>{p}</td><td class="c-pts">{o}</td></tr>' for c,t,s,p,o in ycl)
+body=head(pg)+tabs_band(pg,"yevrokubky","",pg.h1,"Ліга чемпіонів, Ліга Європи та Ліга конференцій: усі матчі українських команд сезону 2026/27.",ytabs,
+     stats=[("Клубів у турнірах","3"),("Наступний матч","6 листопада")])+f'''
+<main id="main" class="wrap">
+  <section class="board board--single" aria-labelledby="yb-h"><div class="board__head"><h2 id="yb-h">Найближчі матчі</h2></div>{zb_rows(yup)}</section>
+  <div class="grid">
+    <div class="grid__main">
+      <section class="panel"><h2 class="panel__title">Українські клуби в турнірах</h2>
+      <div class="tbl-scroll"><table class="standings" data-source="api:standings"><thead><tr><th scope="col" class="c-team">Клуб</th><th scope="col" class="c-club">Турнір</th><th scope="col" class="c-club">Стадія</th><th scope="col" title="Місце в таблиці">Місце</th><th scope="col" class="c-pts" title="Очки">О</th></tr></thead><tbody>{yrows}</tbody></table></div></section>
+      <section class="panel"><div class="panel__head"><h2>Новини</h2><a href="{pg.u("yevrokubky/news")}">Усі новини</a></div>{news_list(pg,"yevrokubky",demo_news("Єврокубки","yevrokubky",5),5,big=True)}</section>
+    </div>
+    <aside class="grid__side">
+      <section class="panel"><div class="panel__head"><h2>Результати</h2></div>{zb_rows(yres)}</section>
+      <section class="panel"><div class="panel__head"><h2>Рейтинг УЄФА</h2><a href="{pg.u("yevrokubky/rejtyng-uyefa")}">Таблиця</a></div><p>Місце України в таблиці коефіцієнтів і внесок кожного клубу.</p></section>
+    </aside>
+  </div>
+  {DEMO_NOTE("Приклад заповнення: суперники, дати й місця умовні. Дані: API Sportmonks Fixtures by team between dates для клубів УПЛ з фільтром ліг ЛЧ, ЛЄ, ЛК; місця — Standings by season цих турнірів. Потрібні ліги ЛЧ/ЛЄ/ЛК у тарифі — перевірити.")}
+</main>
+'''+foot(pg); write(pg,body)
+
+# ---- /molod/ — U-19 і U-21
+mbase=[("Головна",""),("Молодь","molod")]
+mtabs=[("","Огляд"),("news","Новини"),("u19","U-19"),("u21","U-21")]
+U19=dict(zones=[(1,1,"eu","Чемпіон, путівка до Юнацької ліги УЄФА")],table=[(t,g,w,d,l,f,a,p) for (t,g,w,d,l,f,a,p) in LEAGUES["upl"]["table"]])
+u19next=[("24.10","11:00","Динамо","Кудрівка",""),("24.10","11:00","Полісся","Оболонь",""),("25.10","11:00","Шахтар","Зоря",""),("25.10","12:00","Чорноморець","Карпати","")]
+u19res=[("18.10","","Полісся","Динамо","2:2"),("18.10","","Карпати","Епіцентр","1:0"),("17.10","","Шахтар","Колос","3:0"),("17.10","","Зоря","Чорноморець","1:1")]
+u21m=[("13.11.2026","17:00","Україна U21","Суперник А","","Відбір Євро U-21"),("17.11.2026","18:00","Суперник Б","Україна U21","","Відбір Євро U-21")]
+u21r=[("14.10.2026","","Україна U21","Суперник В","2:1","Відбір Євро U-21"),("10.10.2026","","Суперник А","Україна U21","0:0","Відбір Євро U-21")]
+U21G=dict(zones=[(1,1,"eu","Вихід на Євро U-21"),(2,2,"po","Плей-оф")],table=[("Україна U21",4,3,1,0,7,2,10),("Суперник А",4,2,1,1,5,3,7),("Суперник Б",4,1,1,2,4,6,4),("Суперник В",4,1,0,3,3,7,3),("Суперник Г",4,0,1,3,1,2,1)])
+MN=demo_news("Молодь","molod",8)
+pg=Page("molod","Молодіжний футбол України: U-19 і U-21 — Футбол України",
+        "Національна ліга U-19 і молодіжна збірна України U-21: таблиця, розклад матчів, результати та новини молодіжного футболу.",
+        "Молодіжний футбол України",mbase,"molod")
+body=head(pg)+tabs_band(pg,"molod","",pg.h1,"Національна ліга U-19 і молодіжна збірна України U-21: таблиці, матчі та новини.",mtabs)+f'''
+<main id="main" class="wrap">
+  <section class="board board--single" aria-labelledby="mb-h"><div class="board__head"><h2 id="mb-h">U-19: наступні матчі</h2><a href="{pg.u("molod/u19")}">Календар U-19</a></div>{match_rows(u19next)}</section>
+  <div class="grid">
+    <div class="grid__main"><section class="panel"><div class="panel__head"><h2>Новини</h2><a href="{pg.u("molod/news")}">Усі новини</a></div>{news_list(pg,"molod",MN,5,big=True)}</section></div>
+    <aside class="grid__side">
+      <section class="panel"><div class="panel__head"><h2>Таблиця U-19</h2><a href="{pg.u("molod/u19")}">Повна таблиця</a></div>{table_html(U19,U19["table"][:6],compact=True)}</section>
+      <section class="panel"><div class="panel__head"><h2>Збірна U-21</h2><a href="{pg.u("molod/u21")}">Матчі</a></div>{zb_rows(u21m[:1])}</section>
+    </aside>
+  </div>
+  {DEMO_NOTE("Приклад заповнення: таблиця U-19 повторює УПЛ, суперники U-21 умовні. Дані: API Sportmonks — ліга U-19 України і відбір Євро U-21 (кожна +€4/міс, перевірити покриття).")}
+</main>
+'''+foot(pg); write(pg,body)
+
+pg=Page("molod/news","Новини молодіжного футболу України — Футбол України","Новини Національної ліги U-19 та молодіжної збірної України U-21.",
+        "Новини молодіжного футболу",mbase+[("Новини","molod/news")],"molod")
+body=head(pg)+tabs_band(pg,"molod","news",pg.h1,None,mtabs)+f'<main id="main" class="wrap narrow">{news_list(pg,"molod",MN,big=True,thumbs=True)}{pagination(pg,"molod/news",4)}</main>'+foot(pg); write(pg,body)
+
+pg=Page("molod/u19","Національна ліга U-19 2026/27: таблиця, календар, результати — Футбол України",
+        "Турнірна таблиця Національної ліги U-19 2026/27, розклад матчів і результати останнього туру.",
+        "Національна ліга U-19 2026/27",mbase+[("U-19","molod/u19")],"molod")
+body=head(pg)+tabs_band(pg,"molod","u19",pg.h1,"Юнацькі команди клубів УПЛ. Чемпіон потрапляє до Юнацької ліги УЄФА.",mtabs)+f'''
+<main id="main" class="wrap">
+  <div class="grid">
+    <div class="grid__main"><section class="panel"><h2 class="panel__title">Турнірна таблиця</h2>{table_html(U19,U19["table"])}{legend(U19)}</section></div>
+    <aside class="grid__side">
+      <section class="panel"><h2 class="panel__title">10-й тур</h2>{match_rows(u19next)}</section>
+      <section class="panel"><h2 class="panel__title">9-й тур, результати</h2>{match_rows(u19res)}</section>
+    </aside>
+  </div>
+  {DEMO_NOTE("Приклад заповнення. Дані: API Sportmonks Standings by season і Rounds/Fixtures ліги U-19. Оновлення після кожного туру.")}
+</main>
+'''+foot(pg); write(pg,body)
+
+pg=Page("molod/u21","Молодіжна збірна України U-21: матчі, результати, таблиця відбору — Футбол України",
+        "Молодіжна збірна України U-21: розклад і результати матчів відбору на Євро U-21, таблиця групи.",
+        "Молодіжна збірна України U-21",mbase+[("U-21","molod/u21")],"molod")
+body=head(pg)+tabs_band(pg,"molod","u21",pg.h1,"Відбір на молодіжний чемпіонат Європи: матчі, результати й таблиця групи.",mtabs)+f'''
+<main id="main" class="wrap">
+  <div class="grid">
+    <div class="grid__main">
+      <section class="panel"><h2 class="panel__title">Майбутні матчі</h2>{zb_rows(u21m)}</section>
+      <section class="panel"><h2 class="panel__title">Зіграні матчі</h2>{zb_rows(u21r)}</section>
+    </div>
+    <aside class="grid__side"><section class="panel"><h2 class="panel__title">Таблиця групи</h2>{table_html(U21G,U21G["table"],compact=True)}{legend(U21G)}</section></aside>
+  </div>
+  {DEMO_NOTE("Приклад заповнення: суперники умовні. Дані: API Sportmonks Fixtures by team (Україна U21) і Standings відбору Євро U-21.")}
+</main>
+'''+foot(pg); write(pg,body)
+
+
 # ---------------------------------------------------------------- індекс шаблонів
 idx=Page("", "Шаблони сторінок — Футбол України", "Перелік шаблонів нової структури сайту.", "Шаблони сторінок нової структури", [("Головна","")], "")
 rows="".join(f'<tr><td><a href="{idx.u(p)}">/{p}/</a></td><td>{E(h)}</td></tr>' for p,h,_ in sorted(PAGES))
 body=head(idx)+f'''<div class="band"><div class="wrap"><div class="band__title"><h1>Шаблони сторінок нової структури</h1></div>
-<p class="band__lead">Сторінки з вкладки «301 основа». Дані актуальні на 19.10.2026, у робочій версії їх підставляє WordPress і API.</p></div></div>
+<p class="band__lead">Сторінки з вкладок «301 основа» і «Структура». Дані актуальні на 19.10.2026, у робочій версії їх підставляє WordPress і API.</p></div></div>
 <main id="main" class="wrap narrow"><section class="panel"><div class="tbl-scroll"><table class="standings index"><thead><tr><th scope="col" class="c-team">Адреса на сайті</th><th scope="col" class="c-team">Сторінка</th></tr></thead><tbody>{rows}</tbody></table></div></section></main>
 '''+foot(idx)
 open(os.path.join(OUT,"index.html"),"w",encoding="utf-8").write(body)
