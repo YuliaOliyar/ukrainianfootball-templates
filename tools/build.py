@@ -134,6 +134,29 @@ UPL_SC_ARCH=[("Кауан Еліас","Шахтар",2,3,0),("Ігор Крас�
 
 # ---------------------------------------------------------------- шаблон
 NAV=[("upl","УПЛ"),("persha-liga","Перша ліга"),("druga-liga","Друга ліга"),("transfery-ukrayiny","Трансфери"),("zbirna-ukrayiny","Збірна України")]
+# Головне меню з підменю: (розділ, назва, [(шлях, назва підпункту)])
+MENU=[("upl","УПЛ",[("upl","Огляд"),("upl/news","Новини"),("upl/table","Таблиця"),("upl/calendar","Календар"),("upl/bombardyry","Бомбардири")]),
+      ("persha-liga","Перша ліга",[("persha-liga","Огляд"),("persha-liga/news","Новини"),("persha-liga/table","Таблиця"),("persha-liga/calendar","Календар"),("persha-liga/bombardyry","Бомбардири")]),
+      ("druga-liga","Друга ліга",[("druga-liga","Огляд"),("druga-liga/news","Новини"),("druga-liga/table","Таблиця"),("druga-liga/calendar","Календар"),("druga-liga/bombardyry","Бомбардири")]),
+      ("transfery-ukrayiny","Трансфери",[]),
+      ("zbirna-ukrayiny","Збірна",[("zbirna-ukrayiny","Огляд"),("zbirna-ukrayiny/news","Новини"),("zbirna-ukrayiny/calendar","Календар"),("zbirna-ukrayiny/table","Таблиця групи"),("zbirna-ukrayiny/bombardyry","Бомбардири")]),
+      ("kluby","Клуби",[("kluby","Усі клуби"),("gravczi","Гравці")]),
+      ("live","Футбол онлайн",[("live","Матчі сьогодні"),("translyacziyi","Де дивитися")]),
+      ("molod","Молодь",[("molod","Огляд"),("molod/u19","U-19"),("molod/u21","U-21"),("molod/news","Новини")])]
+CARET='<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5L5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+SEC_OF={"translyacziyi":"live","gravczi":"kluby"}
+def menu_html(pg):
+    cur=SEC_OF.get(pg.section,pg.section)
+    out=""
+    for k,label,subs in MENU:
+        ac=' aria-current="true"' if cur==k else ""
+        if not subs:
+            out+=f'<li><a href="{pg.u(k)}"{ac}>{E(label)}</a></li>'; continue
+        items="".join(f'<li><a href="{pg.u(p)}"{" aria-current=\"page\"" if pg.path==p else ""}>{E(n)}</a></li>' for p,n in subs)
+        out+=(f'<li class="has-sub{" is-current" if cur==k else ""}"><a href="{pg.u(k)}"{ac}>{E(label)}</a>'
+              f'<button class="sub-toggle" type="button" aria-expanded="false" aria-controls="sub-{k}" aria-label="Підрозділи: {E(label)}">{CARET}</button>'
+              f'<ul class="sub" id="sub-{k}">{items}</ul></li>')
+    return out
 
 def rel(depth, path):  # path без початкового "/" ; повертає відносне посилання
     return "../"*depth + (path if path else "index.html") + ("" if path.endswith(".html") or not path else "")
@@ -150,7 +173,7 @@ def head(pg, extra_ld=None):
     bc={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":i+1,"name":n,"item":D+"/"+p.strip("/")+("/" if p.strip("/") else "")} for i,(n,p) in enumerate(pg.crumbs)]}
     ld=[bc]+(extra_ld or [])
     css=pg.u("").replace("index.html","")+"assets/css/main.css"; js=pg.u("").replace("index.html","")+"assets/js/main.js"
-    nav="".join(f'<li><a href="{pg.u(k)}"{" aria-current=\"page\"" if pg.section==k else ""}>{E(v)}</a></li>' for k,v in NAV)
+    nav=menu_html(pg)
     crumbs=" ".join(f'<li><a href="{pg.u(p)}">{E(n)}</a></li>' if i<len(pg.crumbs)-1 else f'<li aria-current="page">{E(n)}</li>' for i,(n,p) in enumerate(pg.crumbs))
     return f'''<!doctype html>
 <html lang="uk">
@@ -178,14 +201,15 @@ def head(pg, extra_ld=None):
   <div class="wrap site-head__in">
     <a class="logo" href="{pg.u("")}" aria-label="Футбол України — на головну"><svg class="logo__mark" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><path d="M20 2.5L35.5 7.5V20c0 9.2-6.6 15.4-15.5 18-8.9-2.6-15.5-8.8-15.5-18V7.5z" fill="#ffd23f"/><path d="M20 2.5L35.5 7.5V21H4.5V7.5z" fill="#1c4fd6"/><path d="M20 2.5L35.5 7.5V20c0 9.2-6.6 15.4-15.5 18-8.9-2.6-15.5-8.8-15.5-18V7.5z" fill="none" stroke="#13213c" stroke-width="2"/><circle cx="20" cy="20.5" r="8" fill="#fff" stroke="#13213c" stroke-width="1.6"/><path d="M20 16.6l3.7 2.7-1.4 4.3h-4.6l-1.4-4.3z" fill="#13213c"/></svg><span class="logo__words"><span class="logo__w1">Футбол</span><span class="logo__w2">України</span></span></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Меню</button>
-    <nav id="site-nav" class="site-nav" aria-label="Розділи"><ul>{nav}</ul></nav>
+    <nav id="site-nav" class="site-nav" aria-label="Розділи"><ul class="menu">{nav}</ul></nav>
+    <a class="search-btn" href="{pg.u("")}?s=" aria-label="Пошук"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
   </div>
 </header>
 <div class="crumbs-bar"><nav class="crumbs wrap" aria-label="Хлібні крихти"><ol>{crumbs}</ol></nav></div>
 '''
 
 def foot(pg):
-    links="".join(f'<li><a href="{pg.u(k)}">{E(v)}</a></li>' for k,v in NAV)
+    links="".join(f'<li><a href="{pg.u(k)}">{E(v)}</a></li>' for k,v,_ in MENU)
     js=pg.u("").replace("index.html","")+"assets/js/main.js"
     return f'''<footer class="site-foot">
   <div class="wrap site-foot__in">

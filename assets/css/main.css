@@ -384,3 +384,62 @@ html{scroll-behavior:smooth}
 .grid>*{min-width:0}
 .band:has(.profile){padding-bottom:24px}
 .band:has(.profile)+main{padding-top:24px}
+
+/* ===================== v6: головне меню з підменю ===================== */
+.site-head{position:relative;z-index:30}
+.site-head__in{gap:20px}
+.site-nav{margin-left:auto}
+.site-nav .menu{display:flex;align-items:center;gap:2px;list-style:none;margin:0;padding:0}
+.menu>li{position:relative;display:flex;align-items:center;border-radius:8px}
+.menu>li>a{padding:10px 12px;border-radius:8px;font:600 15px/1 var(--f-text);color:#dbe3f0;white-space:nowrap;background:none}
+.menu>li.has-sub>a{padding-right:4px}
+.menu>li:hover,.menu>li:focus-within,.menu>li.is-open{background:rgba(255,255,255,.07)}
+.menu>li:hover>a,.menu>li.is-open>a{color:#fff;background:none}
+/* активний розділ — жовта риска знизу, як у вкладках розділу */
+.menu>li>a[aria-current]{background:none;color:#fff}
+.menu>li.has-sub:hover::after,.menu>li.has-sub.is-open::after,.menu>li.has-sub:focus-within::after{opacity:0}
+.menu>li:has(>a[aria-current])::after{content:"";transition:opacity .15s;position:absolute;left:12px;right:12px;bottom:-15px;height:3px;border-radius:3px 3px 0 0;background:var(--yellow)}
+.sub-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:34px;margin-right:4px;padding:0;border:0;border-radius:6px;background:none;color:#9fb0cc;cursor:pointer}
+.sub-toggle:hover{color:#fff}
+.sub-toggle svg{transition:transform .15s}
+.has-sub.is-open>.sub-toggle svg{transform:rotate(180deg)}
+.site-nav .sub{display:block;flex-direction:column;position:absolute;top:100%;left:0;min-width:220px;margin:0;padding:8px;list-style:none;background:#1b2a49;border:1px solid rgba(255,255,255,.1);border-radius:12px;box-shadow:0 16px 40px rgba(5,12,28,.45);
+  opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .15s,transform .15s,visibility 0s .15s}
+.sub::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px} /* місток, щоб підменю не закривалося дорогою від пункту */
+.menu>li.has-sub:hover>.sub,.menu>li.has-sub:focus-within>.sub,.menu>li.has-sub.is-open>.sub{opacity:1;visibility:visible;transform:none;transition:opacity .15s,transform .15s}
+.menu>li.has-sub>.sub{top:calc(100% + 10px)}
+.menu>li:nth-last-child(-n+3)>.sub{left:auto;right:0}
+.sub a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font:500 15px/1.2 var(--f-text);color:#dbe3f0;text-decoration:none;white-space:nowrap}
+.sub a::before{content:"";width:4px;height:4px;border-radius:50%;background:#4a5d80;flex:none}
+.sub a:hover{background:rgba(255,255,255,.07);color:#fff}
+.sub a:hover::before{background:var(--yellow)}
+.sub a[aria-current]{background:rgba(255,255,255,.06);color:var(--yellow)}
+.sub a[aria-current]::before{background:var(--yellow)}
+.site-nav a:focus-visible,.sub-toggle:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+/* ширина 1100–1240: компактніше */
+@media (max-width:1240px){.menu>li>a{padding:10px 9px;font-size:14.5px}.menu>li.has-sub>a{padding-right:2px}.sub-toggle{width:22px;margin-right:2px}}
+/* < 1100 px: бургер і акордеон */
+@media (max-width:1100px){
+  .nav-toggle{display:block;margin-left:auto}
+  .site-nav{display:none;position:absolute;left:0;right:0;top:72px;margin:0;background:var(--ink);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(5,12,28,.4);max-height:calc(100vh - 72px);overflow:auto}
+  .site-nav.is-open{display:block}
+  .site-nav .menu{flex-direction:column;align-items:stretch;gap:0;padding:8px 16px 20px;max-width:640px}
+  .menu>li{flex-wrap:wrap;border-radius:0;border-bottom:1px solid rgba(255,255,255,.08)}
+  .menu>li:hover,.menu>li:focus-within,.menu>li.is-open{background:none}
+  .menu>li>a{flex:1;padding:16px 4px;font-size:16px}
+  .menu>li:has(>a[aria-current])::after{display:none}
+  .menu>li>a[aria-current]{color:var(--yellow)}
+  .sub-toggle{width:48px;height:48px;margin:0;border-left:1px solid rgba(255,255,255,.08);border-radius:0}
+  .site-nav .sub{position:static;flex:1 0 100%;min-width:0;display:none;opacity:1;visibility:visible;transform:none;transition:none;background:none;border:0;box-shadow:none;padding:0 0 12px 8px}
+  .sub::before{display:none}
+  .site-nav .menu>li.has-sub:hover>.sub,.site-nav .menu>li.has-sub:focus-within>.sub{display:none}
+  .site-nav .menu>li.has-sub.is-open>.sub{display:block}
+  .sub a{padding:12px;font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){.sub,.sub-toggle svg{transition:none}}
+/* пошук — іконка; поле пошуку відкривається на сторінці пошуку або в оверлеї */
+.search-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:8px;color:#dbe3f0;border:1px solid rgba(255,255,255,.18)}
+.search-btn:hover{color:#fff;background:rgba(255,255,255,.07)}
+.search-btn:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.site-head__in{gap:16px}
+@media (max-width:1100px){.search-btn{order:2}.nav-toggle{order:3;margin-left:0}.site-nav{order:4}.logo{margin-right:auto}}

@@ -10,6 +10,33 @@
       btn.textContent = open ? 'Закрити' : 'Меню';
     });
   }
+  // Підменю: кнопка-стрілка відкриває/закриває (на мобільному — акордеон), Esc і клік поза меню закривають
+  var subs = document.querySelectorAll('.menu .has-sub');
+  function closeAll(except) {
+    subs.forEach(function (li) {
+      if (li === except) return;
+      li.classList.remove('is-open');
+      var b = li.querySelector('.sub-toggle'); if (b) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  subs.forEach(function (li) {
+    var b = li.querySelector('.sub-toggle');
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = !li.classList.contains('is-open');
+      closeAll(li);
+      li.classList.toggle('is-open', open);
+      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+  document.addEventListener('click', function (e) { if (!e.target.closest('.menu')) closeAll(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var li = document.activeElement && document.activeElement.closest('.has-sub');
+    closeAll();
+    if (li) { li.querySelector('.sub-toggle').focus(); li.querySelector('.sub-toggle').blur(); }
+    if (document.activeElement) document.activeElement.blur();
+  });
   // Календар: прокрутити смугу турів до поточного туру
   var cur = document.querySelector('.rounds .is-current');
   if (cur && cur.scrollIntoView) {
